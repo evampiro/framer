@@ -54,6 +54,7 @@ app.use("/", async (req, res) => {
   request(url, (error, response, body) => {
     if (error) return res.status(500).send("Failed");
     body = body.replace(/<!--[\s\S]*?-->/g, '');
+    body = body.replace('<div id="__framer-badge-container"></div>', '');
     const $ = cheerio.load(body);
     $("script, link, img, iframe, source").each((_, element) => {
       const attr = element.tagName === "script" ? "src" :
@@ -67,11 +68,11 @@ app.use("/", async (req, res) => {
         }
       }
     });
-    const css = `
-    #__framer-badge-container {
-        display: none !important;
-    }
-`;
+//     const css = `
+//     #__framer-badge-container {
+//         display: none !important;
+//     }
+// `;
 $('head').append(`<style>${css}</style>`);
     const modifiedHTML = $.html();
  
