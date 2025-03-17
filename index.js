@@ -73,7 +73,7 @@ app.use("/", async (req, res) => {
 //         display: none !important;
 //     }
 // `;
-$('head').append(`<style>${css}</style>`);
+// $('head').append(`<style>${css}</style>`);
     const modifiedHTML = $.html();
  
     return res.send(modifiedHTML);
