@@ -55,6 +55,7 @@ app.use("/", async (req, res) => {
     if (error) return res.status(500).send("Failed");
     body = body.replace(/<!--[\s\S]*?-->/g, '');
     body = body.replace('<div id="__framer-badge-container"></div>', '');
+    body = body.replace(/https:\/\/framerusercontent\.com\//g, 'https://cdn.sanimstha.com.np/');
     const $ = cheerio.load(body);
     $("script, link, img, iframe, source").each((_, element) => {
       const attr = element.tagName === "script" ? "src" :
