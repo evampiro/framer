@@ -48,9 +48,6 @@ redisClient.connect();
 //   });
  
 // });
-
-app.use(router)
-
 router.get("/clear",async(req,res)=>{
   try{
 const keys= await redisClient.keys(`${process.env.SITE}:*`)
@@ -75,7 +72,11 @@ return res.status(500).send("Failed to clear cache");
 }
 })
 
-router.get("/", async (req, res) => {
+app.use(router)
+
+
+
+app.use("/", async (req, res) => {
   
  
   try{
