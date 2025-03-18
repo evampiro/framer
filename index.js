@@ -114,7 +114,7 @@ return res.send(data)
     // `;
     // $('head').append(`<style>${css}</style>`);
         const modifiedHTML = $.html();
-        redisClient.set(cacheKey, cacheTTL, modifiedHTML);
+        redisClient.set(cacheKey, modifiedHTML);
         console.log("live data")
         return res.send(modifiedHTML);
       })
