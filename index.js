@@ -1,6 +1,7 @@
 const express = require("express");
 const request = require("request");
 const redis = require("redis");
+const formidable = require('express-formidable');
 const cheerio = require("cheerio");
 const app = express();
 const dotenv = require("dotenv");
@@ -48,6 +49,7 @@ redisClient.connect();
 //   });
  
 // });
+app.use(formidable());
 router.get("/clear",async(req,res)=>{
   try{
 const keys= await redisClient.keys(`${process.env.SITE}:*`)
@@ -70,6 +72,13 @@ catch(e)
 console.error("Redis KEYS error:", err);
 return res.status(500).send("Failed to clear cache");
 }
+})
+
+
+router.post("/form",async (req,res,next)=>{
+
+  console.log(req.fields)
+  return res.status(201).json({message:"Done"})
 })
 
 app.use(router)
@@ -101,7 +110,7 @@ return res.send(data)
                        element.tagName === "link" ? "href" :
                        element.tagName === "img" || element.tagName === "source" ? "src" : null;
     
-          if (attr && $(element).attr(attr)) {
+          if (attr && $(element).attr(attr)) {[]
             let newUrl = $(element).attr(attr);
             if (newUrl.startsWith("/") || !newUrl.startsWith("http")) {
               $(element).attr(attr, targetSite + newUrl);
@@ -113,7 +122,108 @@ return res.send(data)
     //         display: none !important;
     //     }
     // `;
-    // $('head').append(`<style>${css}</style>`);
+//     const script = `<script>
+//     function replaceImageLinks() {
+//     document.querySelectorAll('img').forEach(img => {
+//         if (img.src.includes('framerusercontent.com')) {
+//             img.src = img.src.replace('framerusercontent.com', 'cdn.sanimstha.com.np');
+//         }
+
+//          if (img.srcset.includes('framerusercontent.com')) {
+//             img.srcset = img.srcset.replace(/framerusercontent\.com/g, 'cdn.sanimstha.com.np');
+//         }
+//     });
+// }
+// window.addEventListener('load', replaceImageLinks);
+// // setInterval(replaceImageLinks, 2000);
+//      </script>`;
+const formScript = `
+<script>
+function handleForm(){
+const form = document.querySelector("form");
+if(!form)
+return
+form.replaceWith(form.cloneNode(true));
+const newForm = document.querySelector("form");
+  const submitBtn = newForm.querySelector("[type='submit']");
+  const originalBtnHTML = submitBtn.innerHTML;
+  const thankyou = originalBtnHTML
+  
+  newForm.addEventListener("submit", async function(e) {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    // Change button to loading state
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = "...";
+    
+    try {
+      const formData = new FormData(newForm);
+      const response = await fetch("/form", {
+        method: "POST",
+        body: formData
+      });
+      
+      // const result = await response.json();
+      
+      // console.log(originalBtnHTML)
+      submitBtn.innerHTML = '<p class="framer-text">Thank You</p>';
+     
+      // Reset form after 2 seconds (optional)
+      setTimeout(() => {
+        newForm.reset();
+        submitBtn.innerHTML = originalBtnHTML;
+      
+        submitBtn.disabled = false;
+      }, 2000);
+      
+    } catch (error) {
+      console.error("Error:", error);
+      submitBtn.innerHTML =  '<p class="framer-text">Error! Try Again</p>' 
+
+      setTimeout(() => {
+        submitBtn.innerHTML = originalBtnHTML;
+        submitBtn.disabled = false;
+      }, 2000);
+    }
+  });
+}
+
+  window.addEventListener('load', handleForm);
+ 
+ function watchUrlPath(targetPath, callback, interval = 1000) {
+
+  let hasMatched = false;
+  
+  const checkPath = () => {
+    const currentPath = window.location.pathname;
+    
+    if (currentPath === targetPath && !hasMatched) {
+      hasMatched = true;
+      callback();
+    }
+  };
+
+  // Initial check
+  checkPath();
+  
+  // Set up interval checking
+  const intervalId = setInterval(checkPath, interval);
+  
+  // Return function to stop watching
+  return () => clearInterval(intervalId);
+}
+
+//  window.addEventListener('load',watchUrlPath('/contact',handleForm))
+const stopWatching = watchUrlPath('/contact', () => {
+  
+  handleForm();
+
+});
+  </script>
+  `
+     
+      // $('head').append(script)
+      $('head').append(formScript)
         const modifiedHTML = $.html();
         redisClient.set(cacheKey, modifiedHTML);
         console.log("live data")
@@ -130,3 +240,5 @@ return res.send(data)
 
 
 app.listen(process.env.PORT, () => console.log("Proxy running on port 3000"));
+
+
