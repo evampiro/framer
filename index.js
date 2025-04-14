@@ -191,9 +191,8 @@ const newForm = document.querySelector("form");
   window.addEventListener('load', handleForm);
  
  function watchUrlPath(targetPath, callback, interval = 1000) {
-
   let hasMatched = false;
-  
+
   const checkPath = () => {
     const currentPath = window.location.pathname;
     
@@ -202,14 +201,8 @@ const newForm = document.querySelector("form");
       callback();
     }
   };
-
-  // Initial check
   checkPath();
-  
-  // Set up interval checking
   const intervalId = setInterval(checkPath, interval);
-  
-  // Return function to stop watching
   return () => clearInterval(intervalId);
 }
 
